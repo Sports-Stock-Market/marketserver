@@ -1,0 +1,42 @@
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }} - To-Do List</title>
+        {% else %}
+        <title>Welcome to your To-Do List!</title>
+        {% endif %}
+    </head>
+    <body>
+        {% extends "base.html" %}
+
+        {% block content %}
+            <h1>Hello, {{ current_user.username }}!</h1>
+             <form action="" method="post">
+        {{ form.hidden_tag() }}
+            <p>
+                {{ form.action.label }}<br>
+                {{ form.action(size=32) }}<br>
+                {{ form.due.label }}<br>
+                {{ form.due(size=5) }}<br>
+
+            </p>
+            <p>
+                {{ form.submit() }}
+            </p>
+        </form>
+        <form action="" method="post">
+        {{ deleteform.hidden_tag() }}
+            <p>
+            {% for item in items %}
+            <div><p>In Progress?<input type="checkbox" name="checkbox" value = "{{item.id}}" ><b>{{ item.body }}</b></p></div>
+            {% endfor %}
+            <p>
+                {{ deleteform.submit() }}
+            </p>
+
+        </form>
+            
+    
+        {% endblock %}
+    </body>
+</html>
