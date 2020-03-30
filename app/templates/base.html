@@ -1,14 +1,14 @@
 <html>
     <head>
       {% if title %}
-      <title>{{ title }} - To-Do List</title>
+      <title>{{ title }} - Fanbase</title>
       {% else %}
-      <title>Welcome to your To-Do List!</title>
+      <title>Welcome to your Fanbase!</title>
       {% endif %}
     </head>
     <body>
         <div>
-          To-Do List:
+          Fanbase:
           <a href="{{ url_for('index') }}">Home</a>
           {% if current_user.is_anonymous %}
           <a href="{{ url_for('login') }}">Login</a>
