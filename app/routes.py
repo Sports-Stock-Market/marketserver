@@ -6,12 +6,23 @@ from app.models import User, Portfolio
 from flask_login import login_required
 from flask import request
 from werkzeug.urls import url_parse
+import xlrd
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html', title='Home')
+    excelfile = 'teamprices.xlsx'
+    wb = xlrd.open_workbook(excelfile)
+    sheet = wb.sheet_by_index(0)
+    sheet.cell_value(0, 0)
+    teamslist = []
+    for i in range(31): 
+        teams = sheet.cell_value(i, 0)
+        prices = str(sheet.cell_value(i, 17))
+        teamslist.append(teams + " : " + "$" + prices)
+
+    return render_template('index.html', title='Home', teamslist = teamslist)
 
 # logs users in
 @app.route('/login', methods=['GET', 'POST'])
