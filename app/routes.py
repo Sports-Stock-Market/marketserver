@@ -4,9 +4,22 @@ from app.forms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Portfolio
 from flask_login import login_required
-from flask import request
+from flask import request, g
 from werkzeug.urls import url_parse
 import xlrd
+
+@app.before_request
+def global_user():
+    g.user = current_user
+
+# Make current user available on templates
+@app.context_processor
+def template_user():
+    try:
+        return {'user': g.user}
+    except AttributeError:
+        return {'user': None}
+
 
 @app.route('/')
 @app.route('/index')
