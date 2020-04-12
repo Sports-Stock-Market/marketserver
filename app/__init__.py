@@ -9,7 +9,17 @@ from social_flask_sqlalchemy.models import init_social
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    #Prevents Alembic from dropping tables to protect social_auth models
+    if type_ == "table" and reflected and compare_to is None:
+        return False
+    else:
+        return True
+
+migrate = Migrate(app, db, include_object=include_object)
+
 login = LoginManager(app)
 login.login_view = 'login'
 
