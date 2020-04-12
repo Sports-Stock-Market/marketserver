@@ -58,4 +58,3 @@ dependencies:
     - social-auth-app-flask==1.0.0
     - social-auth-app-flask-sqlalchemy==1.0.1
     - social-auth-storage-sqlalchemy==1.1.0
-prefix: /Users/Matthew/opt/miniconda3/envs/flask
