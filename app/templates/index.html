@@ -1,5 +1,24 @@
-{% extends "base.html" %}
+<html>
+    <body>
+    {% extends "base.html" %}
 
-{% block content %}
-    <h1>Hi, {{ current_user.username }}!</h1>
-{% endblock %}
+    {% block content %}
+        <h1>Hi, {{ current_user.username }}!</h1>
+        <p>{{ teampricelist }}</p>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+                <p> 
+                    {{ form.buy.label }}<br>
+                    {{ form.buy(size=32) }}<br>
+                    {{ form.quantity.label }}<br>
+                    {{ form.quantity(size=5) }}<br>
+                </p>
+                <p>
+                    {{ form.submit() }}
+                </p>
+        </form>
+        <p>Big Spender? <a href="{{ url_for('portfolio') }}">Click to Vist Portfolio!</a></p>
+    {% endblock %}
+
+    </body>
+</html>

@@ -1,12 +1,13 @@
 from flask import render_template, flash, redirect, request, url_for
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, BuyForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Portfolio
+from app.models import User, Portfolio, Teams
 from flask_login import login_required
 from flask import request, g
 from werkzeug.urls import url_parse
 import xlrd
+import sqlalchemy
 
 @app.before_request
 def global_user():
@@ -19,23 +20,53 @@ def template_user():
         return {'user': g.user}
     except AttributeError:
         return {'user': None}
+        
 
-
-@app.route('/')
-@app.route('/index')
-@login_required
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
+@login_required 
 def index():
-    excelfile = 'teamprices.xlsx'
+    cash = db.session.query(Portfolio.cash).filter_by(user_id=current_user.id).first()
+    excelfile = 'prices.xlsx'
     wb = xlrd.open_workbook(excelfile)
     sheet = wb.sheet_by_index(0)
     sheet.cell_value(0, 0)
+    teampricelist = []
     teamslist = []
-    for i in range(31): 
+    priceslist = []
+    for i in range(1, 31):
         teams = sheet.cell_value(i, 0)
         prices = str(sheet.cell_value(i, 17))
-        teamslist.append(teams + " : " + "$" + prices)
+        teamslist.append(teams)
+        priceslist.append(prices)
+        teampricelist.append(teams + " : " + "$" + prices)
 
-    return render_template('index.html', title='Home', teamslist = teamslist)
+
+    all_teamprice = db.session.query(Teams).all()
+    all_teams = db.session.query(Teams.all_teams)
+    price = db.session.query(Teams.price)
+
+
+
+
+
+    teamssssss = [(i.price, i.all_teams) for i in all_teamprice]
+    
+    form = BuyForm()
+    form.buy.choices = teamssssss
+
+
+    if form.validate_on_submit():
+        flash('buyers beware')
+        price = form.quantity.data * form.buy.data
+        print(form.quantity.data)
+        print(form.buy.data)
+        print(price)
+        new_cash = Portfolio(cash = (cash - price))
+        print(new_cash)
+        db.session.append(new_cash)
+
+    return render_template('index.html', title='Home',teampricelist = teampricelist, form = form)
 
 # logs users in
 @app.route('/login', methods=['GET', 'POST'])
