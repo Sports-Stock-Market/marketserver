@@ -8,6 +8,16 @@ from flask import request, g
 from werkzeug.urls import url_parse
 import xlrd
 import sqlalchemy
+from teamprices import teamprices
+
+
+
+
+'''CREATE PORTFOLIO IN REGISTRATION ROUTE'''
+
+
+
+
 
 @app.before_request
 def global_user():
@@ -20,14 +30,16 @@ def template_user():
         return {'user': g.user}
     except AttributeError:
         return {'user': None}
-        
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
-@login_required 
+@login_required
 def index():
-    cash = db.session.query(Portfolio.cash).filter_by(user_id=current_user.id).first()
-    excelfile = 'prices.xlsx'
+    port = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    cash = port.cash
+    print(cash)
+    excelfile = 'teamprices.xlsx'
     wb = xlrd.open_workbook(excelfile)
     sheet = wb.sheet_by_index(0)
     sheet.cell_value(0, 0)
@@ -42,16 +54,16 @@ def index():
         teampricelist.append(teams + " : " + "$" + prices)
 
 
-    all_teamprice = db.session.query(Teams).all()
-    all_teams = db.session.query(Teams.all_teams)
-    price = db.session.query(Teams.price)
+    # all_teamprice = db.session.query(Teams).all()
+    # all_teams = db.session.query(Teams.all_teams)
+    # price = db.session.query(Teams.price)
 
 
 
 
 
-    teamssssss = [(i.price, i.all_teams) for i in all_teamprice]
-    
+    teamssssss = [(price, name) for name, price in teamprices.items()]
+
     form = BuyForm()
     form.buy.choices = teamssssss
 
@@ -62,9 +74,10 @@ def index():
         print(form.quantity.data)
         print(form.buy.data)
         print(price)
-        new_cash = Portfolio(cash = (cash - price))
+        new_cash = port.cash = (cash - price)
         print(new_cash)
-        db.session.append(new_cash)
+        db.session.add(port)
+        db.session.commit()
 
     return render_template('index.html', title='Home',teampricelist = teampricelist, form = form)
 

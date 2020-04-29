@@ -7,7 +7,7 @@
         <p>{{ teampricelist }}</p>
         <form action="" method="post">
             {{ form.hidden_tag() }}
-                <p> 
+                <p>
                     {{ form.buy.label }}<br>
                     {{ form.buy(size=32) }}<br>
                     {{ form.quantity.label }}<br>
@@ -17,7 +17,7 @@
                     {{ form.submit() }}
                 </p>
         </form>
-        <p>Big Spender? <a href="{{ url_for('portfolio') }}">Click to Vist Portfolio!</a></p>
+        <p>Big Spender? <a href="#">Click to Vist Portfolio!</a></p>
     {% endblock %}
 
     </body>

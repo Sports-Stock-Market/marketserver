@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User, Portfolio, Teams
 
@@ -30,7 +30,7 @@ class RegistrationForm(FlaskForm):
 
 
 class BuyForm(FlaskForm):
-    buy = SelectField('Teams', coerce = float, validators=[DataRequired()])
+    buy = SelectField('Teams', coerce=float, validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     submit = SubmitField('Purchase')
 
