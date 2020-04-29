@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
-from app.models import User, Portfolio
+from app.models import User, Portfolio, Teams
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -27,3 +27,14 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email address.')
+
+
+class BuyForm(FlaskForm):
+    buy = SelectField('Teams', coerce=float, validators=[DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired()])
+    submit = SubmitField('Purchase')
+
+class SellForm(FlaskForm):
+    sell = SelectField('Teams', coerce = float, validators = [DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired()])
+    submit = SubmitField('Sell')
