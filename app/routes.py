@@ -73,7 +73,6 @@ def index():
         price = form.quantity.data * form.buy.data
         print(form.quantity.data)
         print(form.buy.data)
-        print(price)
         new_cash = port.cash = (cash - price)
         print(new_cash)
         db.session.add(port)
