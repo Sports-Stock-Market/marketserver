@@ -1,0 +1,31 @@
+<html>
+    <body>
+    {% extends "base.html" %}
+
+    {% block content %}
+    	 <h1>Hi, {{ current_user.username }}!</h1>
+    	 <h2> Checkout the Marketplace!</h2>
+
+    	 <form action="" method="post">
+            {{ form.hidden_tag() }}
+            	<p>
+                    {{ form.submit() }}
+                </p>
+
+        	<p>
+
+            	{% for post in posts %}
+            	<div><input type="radio" name="mycheckbox" value = "{{post.id}}"><b> Team: {{ post.team }}</b></div>
+
+           		<div>Cost: {{ post.price // post.num_team }} Fans / Share </div>
+
+            	<div>Quantity: {{ post.num_team }}</div>
+
+            	{% endfor %}
+
+
+        	</p>
+        </form>
+    {% endblock %}
+	</body>
+</html>

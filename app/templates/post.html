@@ -3,12 +3,15 @@
     {% extends "base.html" %}
 
     {% block content %}
-        <h1>Hi, {{ current_user.username }}!</h1>
-        <form action="" method="post">
+    	 <h1>Hi, {{ current_user.username }}!</h1>
+
+    	 <form action="" method="post">
             {{ form.hidden_tag() }}
                 <p>
-                    {{ form.buy.label }}<br>
-                    {{ form.buy(size=32) }}<br>
+                    {{ form.team.label }}<br>
+                    {{ form.team(size=32) }}<br>
+                    {{ form.price.label}}<br>
+                    {{ form.price(size=32) }}<br>
                     {{ form.quantity.label }}<br>
                     {{ form.quantity(size=5) }}<br>
                 </p>
@@ -16,8 +19,6 @@
                     {{ form.submit() }}
                 </p>
         </form>
-        <p>Big Spender? <a href="{{ url_for('portfolio') }}">Click to Vist Portfolio!</a></p>
     {% endblock %}
-
-    </body>
+	</body>
 </html>

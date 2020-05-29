@@ -13,6 +13,12 @@
           {% if current_user.is_anonymous %}
           <a href="{{ url_for('login') }}">Login</a>
           {% else %}
+          <a href="{{ url_for('prices') }}">Team Prices</a>
+          <a href="{{ url_for('portfolio') }}">Portfolio</a>
+          <a href="{{ url_for('post') }}">Post Offer</a>
+          <a href="{{ url_for('marketplace') }}">Marketplace</a>
+          <a href="{{ url_for('myposts') }}">My Offers</a>
+          <a href="{{ url_for('rankings') }}">Rankings</a>
           <a href="{{ url_for('logout') }}">Logout</a>
           {% endif %}
         </div>

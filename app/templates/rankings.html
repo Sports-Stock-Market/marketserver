@@ -1,0 +1,17 @@
+<html>
+    <body>
+    {% extends "base.html" %}
+
+    {% block content %}
+    	 <h1>Hi, {{ current_user.username }}!</h1>
+    	 <h2> Checkout the Leaderboards!</h2>
+
+
+    	 {% for u in user %}
+    	 <div>{{u.username}} {{u.total_assets}}</div>
+    	 {% endfor %}
+
+
+    {% endblock %}
+	</body>
+</html>

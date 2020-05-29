@@ -4,6 +4,31 @@
 
     {% block content %}
         <h1>Hi, {{ current_user.username }}!</h1>
+
+        <p>
+
+        Fans: {{money}}
+
+        {% for team in teams %}
+
+        <div>{{team.num_team}} {{ team.team }}</div>
+
+        {% endfor %}
+
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+                <p>
+                    {{ form.sell.label }}<br>
+                    {{ form.sell(size=32) }}<br>
+                    {{ form.quantity.label }}<br>
+                    {{ form.quantity(size=5) }}<br>
+                </p>
+                <p>{{ form.submit() }}</p>
+        </form>
+
+        </p>
+
+
     {% endblock %}
 	</body>
 </html>

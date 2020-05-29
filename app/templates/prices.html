@@ -1,0 +1,13 @@
+<html>
+    <body>
+    {% extends "base.html" %}
+
+    {% block content %}
+    	 <h1>Hi, {{ current_user.username }}!</h1>
+
+         {% for i in team_prices %}
+         <div>{{i}}</div>
+         {% endfor %}
+    {% endblock %}
+	</body>
+</html>

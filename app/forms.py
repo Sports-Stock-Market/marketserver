@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
-from app.models import User, Portfolio, Teams
+from app.models import User, Portfolio, Team, Post
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -35,6 +35,18 @@ class BuyForm(FlaskForm):
     submit = SubmitField('Purchase')
 
 class SellForm(FlaskForm):
-    sell = SelectField('Teams', coerce = float, validators = [DataRequired()])
+    sell = SelectField('Teams', coerce=float, validators = [DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     submit = SubmitField('Sell')
+
+class PostForm(FlaskForm):
+    team = SelectField('Team', coerce=str, validators = [DataRequired()])
+    price = FloatField('Price / Share', validators = [DataRequired()])
+    quantity = IntegerField('Quantity', validators = [DataRequired()])
+    submit = SubmitField('Post')
+
+class PurchaseForm(FlaskForm):
+    submit = SubmitField('Purchase')
+
+class RevokeForm(FlaskForm):
+    submit = SubmitField('Revoke Offer')
