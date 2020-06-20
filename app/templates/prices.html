@@ -5,9 +5,26 @@
     {% block content %}
     	 <h1>Hi, {{ current_user.username }}!</h1>
 
-         {% for i in team_prices %}
-         <div>{{i}}</div>
-         {% endfor %}
+        <!-- <form action="" method="post">
+            {{ form.hidden_tag() }} -->
+
+            {% for name, price in team_prices %}
+                <div>
+                    <!-- <input type="radio" name="set" value="{{name}}">  -->
+                    {{name}} : {{price}}
+                </div>
+                
+            {% endfor %}
+
+
+            <!-- <div>
+                {{ form.buy.label }}
+                {{ form.buy(size = 5)}}
+                {{ form.quantity.label }}
+                {{ form.quantity(size=5) }}
+                {{ form.submit() }}
+            </div>
+         </form>  -->
     {% endblock %}
 	</body>
 </html>

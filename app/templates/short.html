@@ -1,0 +1,25 @@
+<html>
+    <body>
+        {% extends "base.html" %}
+
+        {% block content %}
+        <h1>Hi, {{ current_user.username }}!</h1>
+
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.short.label }}<br>
+                {{ form.short}}<br>
+                {{ form.quantity.label }}<br>
+                {{ form.quantity(size=5) }}<br>
+                {{ form.exp_date.label}} <br>
+                {{ form.exp_date(size=15)}} <br>
+
+            </p>
+            <p>{{ form.submit() }}</p>
+        </form>
+
+
+        {% endblock %}
+	</body>
+</html>

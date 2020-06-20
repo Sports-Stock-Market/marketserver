@@ -1,0 +1,39 @@
+<html>
+    <body>
+    {% extends "base.html" %}
+
+    {% block content %}
+    	 <h1>Hi, {{ current_user.username }}!</h1>
+
+    	
+    	<form action="" method="post">
+				{{ form.hidden_tag() }}
+			<p>
+				{{form.search_team.label}}
+				{{form.search_team}}
+			</p>
+			<p>{{ form.submit() }}</p>
+		</form>
+
+		<form action="/search" method="post">
+
+		<p>
+            {% for post in search_results %}
+            <div><input type="radio" name="post" value = "{{post.id}}"><b> Team: {{ post.team }}</b></div>
+
+           	<div>Cost: {{ post.price // post.num_team }} Fans / Share </div>
+
+            <div>Quantity: {{ post.num_team }}</div>
+
+            {% endfor %} 
+        </p>
+
+            {{ buy_form.hidden_tag() }}
+            	<p>
+                    {{ buy_form.submit() }}
+                </p>
+        </form>
+
+    {% endblock %}
+	</body>
+</html>

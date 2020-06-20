@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, FloatField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User, Portfolio, Team, Post
 
@@ -45,8 +46,26 @@ class PostForm(FlaskForm):
     quantity = IntegerField('Quantity', validators = [DataRequired()])
     submit = SubmitField('Post')
 
+class ShortForm(FlaskForm):
+    short = SelectField('Team', coerce=float, validators = [DataRequired()])
+    quantity = IntegerField('Quantity', validators = [DataRequired()])
+    exp_date = DateField('Expiration Date', format = '%Y-%m-%d', validators = [DataRequired()])
+    submit = SubmitField('Short')
+
+class BuybackForm(FlaskForm):
+    submit = SubmitField('buy back early')
+
 class PurchaseForm(FlaskForm):
     submit = SubmitField('Purchase')
 
 class RevokeForm(FlaskForm):
     submit = SubmitField('Revoke Offer')
+
+class SetForm(FlaskForm):
+    quantity = IntegerField('Quantity', validators = [DataRequired()])
+    buy = FloatField('Auto Buy', validators = [DataRequired()])
+    submit = SubmitField('Set')
+
+class SearchForm(FlaskForm):
+    search_team = SelectField('Pick Team Name', validators=[DataRequired()])
+    submit = SubmitField('Search')

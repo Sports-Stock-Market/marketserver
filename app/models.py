@@ -37,7 +37,21 @@ class Team(db.Model):
     team = db.Column(db.String(140))
     price = db.Column(db.Float)
     num_team = db.Column(db.Integer)
+    buy_at = db.Column(db.Float)
+    buy_quant = db.Column(db.Integer)
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
+
+    def __repr__(self):
+        return '<Team {}>'.format(self.team)
+
+class ShortTeam(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team = db.Column(db.String(140))
+    price = db.Column(db.Float)
+    num_team = db.Column(db.Integer)
+    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
+    timestamp = db.Column(db.DateTime, index=True)
+    buy_at = db.Column(db.Float)
 
     def __repr__(self):
         return '<Team {}>'.format(self.team)

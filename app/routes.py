@@ -1,13 +1,41 @@
-from flask import render_template, flash, redirect, request, url_for
+from flask import Flask, jsonify, render_template, flash, redirect, request, url_for
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, BuyForm, SellForm, PostForm, PurchaseForm, RevokeForm
+from app.forms import LoginForm, RegistrationForm, BuyForm, SellForm, PostForm, PurchaseForm, RevokeForm, SearchForm, ShortForm, BuybackForm, SetForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Portfolio, Team, Post
+from app.models import User, Portfolio, Team, Post, ShortTeam
 from flask_login import login_required
 from flask import request, g
 from werkzeug.urls import url_parse
 from teamprices import teamprices
-from sqlalchemy.sql import exists
+from sqlalchemy.sql import exists, operators
+from datetime import datetime
+import threading
+#import time, webbrowser
+
+'''def buyAt():
+    threading.Timer(5.0, buyAt).start()
+    teams = Team.query.all()
+    teamprices.update(teamprices)
+    for name, price in teamprices.items():
+        for t in teams:
+            port = Portfolio.query.filter_by(id = t.portfolio_id).first()
+            if t.team == name:
+                if t.buy_at is None or t.buy_quant is None or t.buy_quant == 0:
+                    pass
+
+                elif (price * t.buy_quant) > port.money:
+                    print("low funds")
+
+                else:
+                    print(price)
+                    print(t.buy_at)
+                    if t.buy_at >= price:
+                        print('acquiring team')
+                        t.num_team += t.buy_quant
+                        port.money -= (price * t.buy_quant)
+                        t.buy_quant = 0
+                        db.session.commit()
+#buyAt()'''
 
 @app.before_request
 def global_user():
@@ -26,6 +54,23 @@ def template_user():
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
+
+    ''' WHERE DO I RUN THIS'''
+    port = Portfolio.query.filter_by(user_id = current_user.id).first()
+    short_teams = ShortTeam.query.filter_by(portfolio_id = port.id).all()
+
+
+    for team in short_teams:
+        if team.timestamp.date() >= datetime.today().date():
+            for name, price in teamprices.items():
+                if team.team == name:
+                    new_price = price
+                    new_money = (team.price - new_price)
+                    print(new_money)
+                    port.money = port.money + new_money
+
+    ''' '''
+
     teamssssss = [(price, name) for name, price in teamprices.items()]
     #print(teamssssss)
 
@@ -34,23 +79,25 @@ def index():
 
 
     if form.validate_on_submit():
-        port = Portfolio.query.filter_by(user_id = current_user.id).first()
         money = port.money
         #print(money)
         price = form.quantity.data * form.buy.data
 
 
         def getName():
-                for name, price in teamprices.items():
-                    if form.buy.data == price:
-                        print(name)
-                        return name
+            for name, price in teamprices.items():
+                if form.buy.data == price:
+                    print(name)
+                    return name
         teams = getName()
 
         team = Team.query.filter_by(portfolio_id = port.id, team = teams).first()
 
         if port.money - price < 0:
             flash('tough luck buttercup, you need more fans')
+
+        elif form.quantity.data <= 0:
+            flash('ILLEGAL MOVE')
         
 
         elif team != None:
@@ -83,22 +130,23 @@ def index():
 @login_required
 def portfolio():
     port = Portfolio.query.filter_by(user_id = current_user.id).first()
-    print(port)
     money = port.money
-    print(money)
 
-    teams = Team.query.filter_by(portfolio_id = port.id).all()
+    teams = Team.query.filter(Team.num_team != 0, Team.portfolio_id == port.id).all()
+
 
     for team in teams:
         for name, price in teamprices.items():
             if team.team == name:
                 team.price = price
-                print(team.price)
     
-    db.session.commit()
+
+    short_teams = ShortTeam.query.filter_by(portfolio_id = port.id).all()
+    print(short_teams)
+
 
     form = SellForm()
-    form.sell.choices = [(t.price, t.team) for t in Team.query.filter_by(portfolio_id = port.id)]
+    form.sell.choices = [(t.price, t.team) for t in Team.query.filter(Team.num_team != 0, Team.portfolio_id == port.id)]
 
     if form.validate_on_submit():
         def getName():
@@ -115,29 +163,107 @@ def portfolio():
 
         if form.quantity.data > team.num_team:
             flash('sell you cannot if have you do not')
+
+        elif form.quantity.data <= 0:
+            flash('ILLEGAL MOVE')
+
         else:
             flash('The trends are your friends')
             port.money = (money + price)
             team.num_team = (team.num_team - form.quantity.data)
             db.session.commit()
-            return redirect(url_for('index'))
+            return redirect(url_for('portfolio'))
+
+    
+    buy_back_form = BuybackForm()
+
+    if buy_back_form.validate_on_submit():
+        if request.method == 'POST':
+            team_id = request.form.get('radiobutt')
+            print(team_id)
+
+            if team_id is None:
+                flash('Select a team')
+
+            else:
+                team = ShortTeam.query.filter_by(id = team_id).first()
+                for name, price in teamprices.items():
+                    if team.team == name:
+                        new_price = price
+                        new_money = (team.price - new_price)
+                        print(new_money)
+                        port.money = port.money + (new_money * team.num_team)
+                        db.session.delete(team)
+                        db.session.commit()
+                        return redirect(url_for('portfolio'))
+    
 
 
 
-    return render_template('portfolio.html', title='Portfolio', form = form, money = money, teams = teams)
+
+    return render_template('portfolio.html', title='Portfolio', form = form, money = money, teams = teams, short_teams = short_teams, buy_back_form = buy_back_form)
+
+@app.route('/short', methods=['GET', 'POST'])
+@login_required
+def short():
+    port = Portfolio.query.filter_by(user_id = current_user.id).first()
+    
+    teamssssss = [(price, name) for name, price in teamprices.items()]
+
+    form = ShortForm()
+    form.short.choices = teamssssss
+
+    def getName():
+        for name, price in teamprices.items():
+            if form.short.data == price:
+                print(name)
+                return name
+        
+    teams = getName()
+    print(teams)
+
+    if form.validate_on_submit():
+        days = form.exp_date.data - datetime.today().date()
+        #print(days.days)
+        if form.exp_date.data <= datetime.today().date():
+            flash('unless you have a time machine, you need to pick a date after today')
+
+        elif port.money < form.quantity.data:
+            flash('The shorting fee is higher than you can afford')
+
+        elif form.quantity.data <= 0:
+            flash('ILLEGAL MOVE')
+        
+        else:
+            flash('no risk, no reward')
+            print(form.quantity.data * days.days)
+            port.money = (port.money - (form.quantity.data))
+            short_team = ShortTeam(team = teams, num_team = form.quantity.data, timestamp = form.exp_date.data, portfolio_id = port.id, price = form.short.data)
+            db.session.add(short_team)
+            db.session.commit()
+            return redirect(url_for('portfolio'))
+
+        
+
+    return render_template('short.html', title='Short', form = form)
 
 @app.route('/post', methods=['GET', 'POST'])
 @login_required
 def post():
     port = Portfolio.query.filter_by(user_id = current_user.id).first()
+    money = port.money
+    teams = Team.query.filter(Team.num_team != 0, Team.portfolio_id == port.id).all()
     form = PostForm()
-    form.team.choices = [(t.team, t.team) for t in Team.query.filter_by(portfolio_id = port.id)]
+    form.team.choices = [(t.team, t.team) for t in Team.query.filter(Team.num_team != 0, Team.portfolio_id == port.id)]
 
     team = Team.query.filter_by(team = form.team.data, portfolio_id = port.id).first()
 
     if form.validate_on_submit():
         if form.quantity.data > team.num_team:
             flash('sell you cannot if have you do not')
+
+        elif form.quantity.data <= 0:
+            flash('ILLEGAL MOVE')
 
         else:
             flash('It is a market of stocks, not a stock market')
@@ -148,7 +274,7 @@ def post():
             return redirect(url_for('marketplace'))
 
 
-    return render_template('post.html', title = 'Post', form = form)
+    return render_template('post.html', title = 'Post', form = form, money = money, teams = teams)
 
 @app.route('/marketplace', methods=['GET', 'POST'])
 @login_required
@@ -178,7 +304,82 @@ def marketplace():
                 team = Team.query.filter_by(portfolio_id = port_buyer.id, team = post.team).first()
 
                 if team is None:
-                
+                    def getPrice():
+                        for name, price in teamprices.items():
+                            if post.team == name:
+                                return price
+
+                    price = getPrice()
+                    add_team = Team(team = post.team, num_team = post.num_team, price = price, portfolio_id = port_buyer.id)
+
+
+                    db.session.add(add_team)
+                    db.session.commit()
+
+
+                teams = Team.query.filter_by(portfolio_id = port_buyer.id, team = post.team).first()
+
+                if (port_buyer.user_id == port_seller.user_id):
+                    flash('you cannot buy your own offer')
+
+                elif (port_buyer.money - post.price) < 0:
+                    flash('buy you cannot if have you do not')
+                else:
+                    flash('When the tide goes out, you see who is swimming naked')
+                    print(post.price)
+                    lost_money = (port_buyer.money - post.price)
+                    port_buyer.money = lost_money
+                    gained_money = (port_seller.money + post.price)
+                    port_seller.money = gained_money
+                    
+                    teams.num_team = post.num_team + teams.num_team
+
+                    delete_post = post
+                    db.session.delete(delete_post)
+
+                    db.session.commit()
+                    return redirect(url_for('portfolio'))
+    
+    return render_template('marketplace.html', title = 'Marketplace', posts = posts, form = form)
+
+@app.route('/search', methods=['GET', 'POST'])
+@login_required
+def search():
+    post = Post.query.all()
+    teamssssss = [(name, name) for name, price in teamprices.items()]
+    #print(teamssssss)
+
+    form = SearchForm()
+    form.search_team.choices = teamssssss
+
+    
+    search_results = Post.query.filter_by(team = form.search_team.data).order_by((Post.price)).all()
+
+    if form.validate_on_submit():
+        if not search_results:
+            flash('No posts for that team, try a new team or purchase from the computer')
+
+    buy_form = PurchaseForm()
+
+    if buy_form.validate_on_submit():
+        if request.method == 'POST':
+            post_id = request.form.get('post')
+            print(request.form.get('post'))
+
+            if post_id is None:
+                flash('Select an Offer')
+
+            else:
+                post = Post.query.filter_by(id = post_id).first()
+
+                port_seller = Portfolio.query.filter_by(user_id = post.user_id).first()
+                port_buyer = Portfolio.query.filter_by(user_id = current_user.id).first()
+
+                #print(db.session.query(Team.id).filter_by(team = post.team).scalar())
+
+                team = Team.query.filter_by(portfolio_id = port_buyer.id, team = post.team).first()
+
+                if team is None:
                     def getPrice():
                         for name, price in teamprices.items():
                             if post.team == name:
@@ -188,15 +389,15 @@ def marketplace():
 
                     add_team = Team(team = post.team, num_team = post.num_team, price = price, portfolio_id = port_buyer.id)
 
-
                     db.session.add(add_team)
                     db.session.commit()
+
 
                 teams = Team.query.filter_by(portfolio_id = port_buyer.id, team = post.team).first()
 
                 if (port_buyer.user_id == port_seller.user_id):
                     flash('you cannot buy your own offer')
-            
+
                 elif (port_buyer.money - post.price) < 0:
                     flash('buy you cannot if have you do not')
                 else:
@@ -212,8 +413,10 @@ def marketplace():
 
                     db.session.commit()
                     return redirect(url_for('portfolio'))
-    
-    return render_template('marketplace.html', title = 'Marketplace', posts = posts, form = form)
+
+
+
+    return render_template('search.html', title = 'Search', form = form, search_results = search_results, post = post, buy_form = buy_form)
 
 @app.route('/rankings', methods=['GET', 'POST'])
 @login_required
@@ -227,6 +430,7 @@ def rankings():
                 assets = assets + (t.price * t.num_team)
 
             return(assets)
+            #return jsonify(result = assets)
     
 
     for p in ports:
@@ -245,8 +449,29 @@ def rankings():
 @app.route('/prices', methods=['GET', 'POST'])
 @login_required
 def prices():
+    port = Portfolio.query.filter_by(user_id = current_user.id).first()
     team_prices = [(name, price) for name, price in teamprices.items()]
-    return render_template('prices.html', title = 'Team Prices', team_prices = team_prices)
+    form = SetForm()
+
+    if form.validate_on_submit():
+        if request.method == 'POST':
+            team = request.form.get('set')
+            print(request.form.get('set'))
+
+            if team is None:
+                flash('Select a team')
+            
+            else:
+                flash('set')
+                team_set = Team.query.filter_by(team = team, portfolio_id = port.id).first()
+                print(team_set.team)
+                team_set.buy_at = form.buy.data
+                team_set.buy_quant = form.quantity.data
+                db.session.commit()
+
+
+
+    return render_template('prices.html', title = 'Team Prices', form = form, team_prices = team_prices)
 
 
 
@@ -320,6 +545,11 @@ def register():
         print(user.id)
         portfolio = Portfolio(user_id = user.id)
         db.session.add(portfolio)
+        db.session.flush()
+        print(portfolio.id)
+        for name, price in teamprices.items():
+            team = Team(team = name, num_team = 0, price = price, portfolio_id = portfolio.id)
+            db.session.add(team)
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))

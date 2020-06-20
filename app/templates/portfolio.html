@@ -1,4 +1,7 @@
 <html>
+	<head>
+		<script src="/static/js/portfolio.js" language="Javascript" type="text/javascript" defer></script>
+	</head>
     <body>
     {% extends "base.html" %}
 
@@ -9,17 +12,52 @@
 
         Fans: {{money}}
 
+        <br>
+
+        <br>
+
+        Teams:
+
         {% for team in teams %}
 
         <div>{{team.num_team}} {{ team.team }}</div>
 
         {% endfor %}
 
+        <br>
+        <br>
+
+        <!-- <form action="" method="post" id = "set_form"></form> -->
+        <form action="" method="post">
+        	{{ buy_back_form.hidden_tag() }}
+
+        	{% if not short_teams %}
+
+        		<p>Shorted Teams: </p>
+
+        	{% endif %}
+
+        	{% for team in short_teams %}
+
+        	<div>
+        		<input type="radio" name="radiobutt" value = "{{team.id}}"> 
+        		{{team.num_team}} {{ team.team }} <b> Expires:</b> {{team.timestamp.date()}} <b> Original Price: </b> {{team.price}} 
+        			<!-- <input type="number" step="0.1" min = "0" name = "buyAt" value = "{{(team.price)}}" id = "num" form = "set_form">
+        			<input type="submit" value = "Set" name="set" id = "set" form = "set_form"> -->
+        	</div>
+
+        	{% endfor %}
+
+        	<p>
+        		{{ buy_back_form.submit() }}
+        	</p>	
+        </form>
+
         <form action="" method="post">
             {{ form.hidden_tag() }}
                 <p>
                     {{ form.sell.label }}<br>
-                    {{ form.sell(size=32) }}<br>
+                    {{ form.sell}}<br>
                     {{ form.quantity.label }}<br>
                     {{ form.quantity(size=5) }}<br>
                 </p>
