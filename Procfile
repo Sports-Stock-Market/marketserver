@@ -1,1 +1,1 @@
-web: gunicorn wsgi:fanbase
+web: gunicorn app:fanbase
