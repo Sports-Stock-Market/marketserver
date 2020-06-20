@@ -1,1 +1,1 @@
-web: gunicorn app:fanbase
+web: gunicorn app:app
