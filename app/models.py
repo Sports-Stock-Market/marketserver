@@ -56,6 +56,12 @@ class ShortTeam(db.Model):
     def __repr__(self):
         return '<Team {}>'.format(self.team)
 
+class Teamprice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, index=True)
+    team = db.Column(db.String(140))
+    price = db.Column(db.Float)
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     team = db.Column(db.String(140))
