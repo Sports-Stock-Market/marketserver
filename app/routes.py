@@ -10,8 +10,6 @@ from teamprices import teamprices
 from sqlalchemy.sql import exists, operators
 from datetime import datetime
 import threading
-import click
-from flask.cli import with_appcontext
 #import time, webbrowser
 
 '''def buyAt():
@@ -38,11 +36,6 @@ from flask.cli import with_appcontext
                         t.buy_quant = 0
                         db.session.commit()
 #buyAt()'''
-
-@click.command(name = "create_tables")
-@with_appcontext
-def create_tables():
-    db.create_all()
 
 @app.before_request
 def global_user():
