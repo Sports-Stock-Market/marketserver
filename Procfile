@@ -1,2 +1,2 @@
 heroku addons:create heroku-postgresql:hobby-dev
-web: gunicorn app:app
+web: gunicorn wsgi:app
